@@ -24,14 +24,22 @@ class TensorModel:
         # Log the dataset shape
         self.logger.debug(f"Training set: {x_train.shape}, Labels: {y_train.shape}")
         self.logger.debug(f"Test set: {x_test.shape}, Labels: {y_test.shape}")
+
+        return (x_train, y_train), (x_test, y_test)
     
-    def create_cnn(self) -> tf.keras.Model:
+    def get_augmentation(self) -> tf.keras.Sequential:
         # Create a data augmentation layer
         data_augmentation = tf.keras.Sequential([
             tf.keras.layers.RandomFlip("horizontal"),   # Randomly flip images horizontally
             tf.keras.layers.RandomRotation(0.1),        # Randomly rotate image up to 10%
             tf.keras.layers.RandomZoom(0.1)    # Randomly zoom image up to 10%
         ])
+
+        return data_augmentation
+    
+    def create_cnn(self) -> tf.keras.Model:
+        # Get data augmentation
+        data_augmentation = self.get_augmentation()
         
         # Create a model
         model = models.Sequential([
@@ -48,7 +56,7 @@ class TensorModel:
         ])
 
         # Compile the model
-        model.compile(optimizer="adam", loss="categorial_crossentropy", metrics=["accuracy"])
+        model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
         model.summary()
 
         return model
