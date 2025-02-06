@@ -2,7 +2,7 @@ from include.Logger import Logger
 from include.Visualiser import Visualiser
 from include.TensorModel import TensorModel
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 if __name__ == "__main__":
     # Create a logger
@@ -25,3 +25,4 @@ if __name__ == "__main__":
     test_loss, test_acc = model.evaluate(x_test, y_test)
 
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
+    visualiser.plot_training_history(history)

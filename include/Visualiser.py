@@ -32,3 +32,28 @@ class Visualiser:
                 plt.axis("off")
 
         plt.savefig(f"{result_directory}augmented_sample_image.png")
+
+    def plot_training_history(self, history):
+        fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+
+        # Create result directory
+        result_directory = f"{self.IMAGE_DIRECTORY}Training/"
+        os.makedirs(result_directory, exist_ok=True)
+
+        # Accuracy plot
+        ax[0].plot(history.history["accuracy"], label="Train Accuracy")
+        ax[0].plot(history.history["val_accuracy"], label="Val Accuracy")
+        ax[0].set_title("Accuracy")
+        ax[0].set_xlabel("Epochs")
+        ax[0].set_ylabel("Accuracy")
+        ax[0].legend()
+
+        # Loss plot
+        ax[1].plot(history.history["loss"], label="Train Loss")
+        ax[1].plot(history.history["val_loss"], label="Val Loss")
+        ax[1].set_title("Loss")
+        ax[1].set_xlabel("Epochs")
+        ax[1].set_ylabel("Loss")
+        ax[1].legend()
+
+        plt.savefig(f"{result_directory}training_history.png")
