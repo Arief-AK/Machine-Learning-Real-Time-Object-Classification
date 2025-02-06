@@ -8,3 +8,5 @@ if __name__ == "__main__":
     # Initalise model handler
     model_handler = TensorModel()
     model_handler.load_data()
+
+    model_handler.create_cnn()
