@@ -23,6 +23,13 @@ if __name__ == "__main__":
     model = model_handler.create_cnn()
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=64, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
-
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history)
+
+    # Get predictions and produce confusion matrix
+    conf_matrix = model_handler.compute_confusion_matrix(model, x_test, y_test)
+    visualiser.plot_confusion_matrix(conf_matrix, model_handler.get_class_names())
+
+    # Produce diagonal-only confusion matrix
+    diagonal_matrix = model_handler.get_diagonal_confusion_matrix(conf_matrix)
+    visualiser.plot_diagonal_confusion_matrix(diagonal_matrix, model_handler.get_class_names())
