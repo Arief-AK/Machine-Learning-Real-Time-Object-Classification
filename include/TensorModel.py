@@ -1,13 +1,25 @@
+import numpy as np
 import tensorflow as tf
+
 from tensorflow.keras import layers, models
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
+
+from sklearn.metrics import confusion_matrix
 
 from include.Logger import Logger
 
 class TensorModel:
     def __init__(self):
         self.logger = Logger(__name__)
+
+    def get_class_names(self) -> list:
+        class_names = [
+            "airplane", "automobile", "bird", "cat", "deer",
+            "dog", "frog", "horse", "ship", "truck"
+        ]
+
+        return class_names
 
     def load_data(self) -> tuple:
         # Load the CIFAR-10 dataset
@@ -60,3 +72,20 @@ class TensorModel:
         model.summary()
 
         return model
+
+    def compute_confusion_matrix(self, model, x_test, y_test):
+        # Convert one-hot encoded labels to class indices
+        y_test_labels = np.argmax(y_test, axis=1)
+        
+        # Produce predictions
+        y_pred = np.argmax(model.predict(x_test), axis=1)
+
+        # Compute confusion matrix
+        cm = confusion_matrix(y_test_labels, y_pred)
+
+        return cm
+    
+    def get_diagonal_confusion_matrix(self, conf_matrix):
+        # Get the diagonal values (true positives)
+        diagonal = np.diag(conf_matrix)
+        return diagonal
