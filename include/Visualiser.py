@@ -33,7 +33,7 @@ class Visualiser:
         os.makedirs(result_directory, exist_ok=True)
         plt.savefig(f"{result_directory}augmented_sample_image.png")
 
-    def plot_training_history(self, history):
+    def plot_training_history(self, history, str_model):
         fig, ax = plt.subplots(1, 2, figsize=(12, 4))
 
         # Accuracy plot
@@ -53,11 +53,11 @@ class Visualiser:
         ax[1].legend()
 
         # Create result directory
-        result_directory = f"{self.IMAGE_DIRECTORY}Training/"
+        result_directory = f"{self.IMAGE_DIRECTORY}Training/{str_model}/"
         os.makedirs(result_directory, exist_ok=True)
-        plt.savefig(f"{result_directory}training_history.png")
+        plt.savefig(f"{result_directory}{str_model}_training_history.png")
     
-    def plot_confusion_matrix(self, matrix, class_names: list):
+    def plot_confusion_matrix(self, matrix, class_names: list, str_model):
         plt.figure(figsize=(8, 6))
         sns.heatmap(matrix, annot=True, fmt="d", cmap="Blues", xticklabels=class_names, yticklabels=class_names)
         plt.xlabel("Predicted Label")
@@ -65,11 +65,11 @@ class Visualiser:
         plt.title("Confusion Matrix")
 
         # Create result directory
-        result_directory = f"{self.IMAGE_DIRECTORY}Training/"
+        result_directory = f"{self.IMAGE_DIRECTORY}Training/{str_model}/"
         os.makedirs(result_directory, exist_ok=True)
-        plt.savefig(f"{result_directory}training_confusion_matrix.png")
+        plt.savefig(f"{result_directory}{str_model}_training_confusion_matrix.png")
 
-    def plot_diagonal_confusion_matrix(self, diagonal, class_names: list):
+    def plot_diagonal_confusion_matrix(self, diagonal, class_names: list, str_model):
         # Create a plot
         plt.figure(figsize=(6, 4))
         plt.bar(range(len(diagonal)), diagonal, color='skyblue', edgecolor='black')
@@ -81,6 +81,6 @@ class Visualiser:
         plt.xticks(range(len(class_names)), class_names, rotation=45, ha="right")
         
         # Create result directory
-        result_directory = f"{self.IMAGE_DIRECTORY}Training/"
+        result_directory = f"{self.IMAGE_DIRECTORY}Training/{str_model}/"
         os.makedirs(result_directory, exist_ok=True)
-        plt.savefig(f"{result_directory}training_diagonal_confusion_matrix.png")
+        plt.savefig(f"{result_directory}{str_model}_training_diagonal_confusion_matrix.png")

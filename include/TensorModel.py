@@ -5,9 +5,12 @@ from tensorflow.keras import layers, models
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 
+from tensorflow.keras.layers import BatchNormalization, Dropout
+
 from sklearn.metrics import confusion_matrix
 
 from include.Logger import Logger
+from include.CNNBuilder import CNNBuilder
 
 class TensorModel:
     def __init__(self):
@@ -49,26 +52,46 @@ class TensorModel:
 
         return data_augmentation
     
-    def create_cnn(self) -> tf.keras.Model:
+    def create_cnn(self, batch_normalisation=False) -> tf.keras.Model:
         # Get data augmentation
         data_augmentation = self.get_augmentation()
-        
-        # Create a model
-        model = models.Sequential([
-            data_augmentation,                                                      # Apply data augmentation
-            layers.Conv2D(32, (3, 3), activation="relu", input_shape=(32, 32, 3)),  # Input layer
-            layers.MaxPooling2D((2, 2)),
-            layers.Conv2D(64, (3, 3), activation="relu"),
-            layers.MaxPooling2D((2, 2)),
-            layers.Conv2D(128, (3, 3), activation="relu"),
-            layers.MaxPooling2D((2, 2)),
-            layers.Flatten(),
-            layers.Dense(128, activation="relu"),                                   # Classification layer
-            layers.Dense(10, activation="relu"),                                   # Classification layer to 10 output classes
-        ])
 
-        # Compile the model
-        model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+        # Create a builder
+        builder = CNNBuilder(input_shape=(32, 32, 3))
+        
+        if batch_normalisation:
+            model = (builder
+                    .add_data_augmentation(data_augmentation)
+                    .add_conv_layer(32, (3,3))
+                    .add_batch_norm()
+                    .add_pooling_layer()
+                    .add_conv_layer(64, (3, 3))
+                    .add_batch_norm()
+                    .add_pooling_layer()
+                    .add_flaten_layer()
+                    .add_dense_layer(128, activation="relu")
+                    .add_batch_norm()
+                    .add_dropout(0.5)
+                    .add_dense_layer(10, activation="softmax")
+                    .compile_model()
+                    .build()
+                    )
+        else:   
+            # Create a base model
+            model = (builder
+                    .add_data_augmentation(data_augmentation)
+                    .add_conv_layer(32, (3,3))
+                    .add_pooling_layer()
+                    .add_conv_layer(64, (3, 3))
+                    .add_pooling_layer()
+                    .add_flaten_layer()
+                    .add_dense_layer(128, activation="relu")
+                    .add_dense_layer(10, activation="softmax")
+                    .compile_model()
+                    .build()
+                    )
+
+        # Summarise the model
         model.summary()
 
         return model
