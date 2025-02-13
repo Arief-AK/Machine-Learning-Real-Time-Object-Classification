@@ -49,7 +49,7 @@ class TensorModel:
 
         return data_augmentation
     
-    def create_cnn(self, batch_normalisation=False, learning_rate=0.001, decay_factor=0.95) -> tf.keras.Model:
+    def create_cnn(self, optimiser="adam", batch_normalisation=False, learning_rate=0.001, decay_factor=0.95) -> tf.keras.Model:
         # Get data augmentation
         data_augmentation = self.get_augmentation()
 
@@ -70,7 +70,7 @@ class TensorModel:
                     .add_batch_norm()
                     .add_dropout(0.5)
                     .add_dense_layer(10, activation="softmax")
-                    .compile_model(learning_rate=learning_rate, decay_factor=decay_factor)
+                    .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor)
                     .build()
                     )
         else:   
@@ -84,7 +84,7 @@ class TensorModel:
                     .add_flaten_layer()
                     .add_dense_layer(128, activation="relu")
                     .add_dense_layer(10, activation="softmax")
-                    .compile_model(learning_rate=learning_rate, decay_factor=decay_factor)
+                    .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor)
                     .build()
                     )
 
