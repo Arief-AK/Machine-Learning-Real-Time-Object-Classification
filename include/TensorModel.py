@@ -60,17 +60,14 @@ class TensorModel:
             model = (builder
                     .add_data_augmentation(data_augmentation)
                     .add_conv_layer(32, (3,3))
-                    .add_batch_norm()
                     .add_pooling_layer()
                     .add_conv_layer(64, (3, 3))
-                    .add_batch_norm()
                     .add_pooling_layer()
                     .add_flaten_layer()
                     .add_dense_layer(128, activation="relu")
-                    .add_batch_norm()
                     .add_dropout(0.5)
                     .add_dense_layer(10, activation="softmax")
-                    .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor)
+                    .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor, use_lr_warmup=True, use_early_stopping=True)
                     .build()
                     )
         else:   
