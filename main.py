@@ -2,7 +2,7 @@ from include.Logger import Logger
 from include.Visualiser import Visualiser
 from include.TensorModel import TensorModel
 
-NUM_EPOCHS = 20
+NUM_EPOCHS = 50
 
 def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser, model, x_test, y_test, str_model):
     conf_matrix = model_handler.compute_confusion_matrix(model, x_test, y_test)
