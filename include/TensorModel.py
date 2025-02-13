@@ -1,11 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
-from tensorflow.keras import layers, models
-from tensorflow.keras.datasets import cifar10
-from tensorflow.keras.utils import to_categorical
-
-from tensorflow.keras.layers import BatchNormalization, Dropout
+from tensorflow.keras.datasets import cifar10       # type: ignore
+from tensorflow.keras.utils import to_categorical   # type: ignore
 
 from sklearn.metrics import confusion_matrix
 
@@ -52,7 +49,7 @@ class TensorModel:
 
         return data_augmentation
     
-    def create_cnn(self, batch_normalisation=False) -> tf.keras.Model:
+    def create_cnn(self, optimiser="adam", batch_normalisation=False, learning_rate=0.001, decay_factor=0.95) -> tf.keras.Model:
         # Get data augmentation
         data_augmentation = self.get_augmentation()
 
@@ -73,7 +70,7 @@ class TensorModel:
                     .add_batch_norm()
                     .add_dropout(0.5)
                     .add_dense_layer(10, activation="softmax")
-                    .compile_model()
+                    .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor)
                     .build()
                     )
         else:   
@@ -87,7 +84,7 @@ class TensorModel:
                     .add_flaten_layer()
                     .add_dense_layer(128, activation="relu")
                     .add_dense_layer(10, activation="softmax")
-                    .compile_model()
+                    .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor)
                     .build()
                     )
 
