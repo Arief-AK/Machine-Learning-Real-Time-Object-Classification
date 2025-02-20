@@ -1,8 +1,10 @@
-from include.Logger import Logger
 from include.Visualiser import Visualiser
+from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
+from include.ModelProfiler import ModelProfiler
 
 NUM_EPOCHS = 50
+BATCH_PROFILING = [32, 64]
 
 def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser, model, x_test, y_test, str_model):
     conf_matrix = model_handler.compute_confusion_matrix(model, x_test, y_test)
@@ -17,6 +19,8 @@ def train_base_model(model_handler: TensorModel, visualiser: Visualiser, logger:
     model = model_handler.create_cnn()
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=64, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
+    model.save(f"models/{model_name}.h5")
+    
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
     return (model, model_name), (test_acc)
@@ -26,6 +30,8 @@ def train_model_batch_normalised(model_handler: TensorModel, visualiser: Visuali
     model = model_handler.create_cnn(batch_normalisation=True)
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=64, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
+    model.save(f"models/{model_name}.h5")
+    
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
     return (model, model_name), (test_acc)
@@ -35,6 +41,8 @@ def train_model_batch_normalised_sgd(model_handler: TensorModel, visualiser: Vis
     model = model_handler.create_cnn(optimiser="sgd", batch_normalisation=True)
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=64, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
+    model.save(f"models/{model_name}.h5")
+    
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
     return (model, model_name), (test_acc)
@@ -44,6 +52,8 @@ def train_model_batch_normalised_rmsprop(model_handler: TensorModel, visualiser:
     model = model_handler.create_cnn(optimiser="rmsprop", batch_normalisation=True)
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=64, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
+    model.save(f"models/{model_name}.h5")
+
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
     return (model, model_name), (test_acc)
@@ -71,12 +81,32 @@ def train_models(model_handler: TensorModel, visualiser: Visualiser, logger: Log
 
     return model_acc_results
 
+def profile_models(model_acc_results:dict):
+    # Initialise profiler
+    profiler = ModelProfiler()
+
+    for batch_size in BATCH_PROFILING:
+        # Load models
+        for model_name, accuracy in model_acc_results.items():
+            # Load the model and data
+            model = model_handler.load_model(f"models/{model_name}.h5")
+            (_, _), (x_test, _) = model_handler.load_data()
+            batch_time, throughput_time = profiler.measure_average_inference_time(batch_size, model, x_test, show_single_image_inference=True)
+
+            # Log the results
+            logger.info(f"Model: {model_name}")
+            logger.info(f"Batch size: {batch_size}")
+            logger.info(f"Batch time: {batch_time:.2f}ms")
+            logger.info(f"Throughput: {throughput_time:.2f} images/s")
+            logger.info(f"Accuracy:{accuracy * 100:.2f}%\n")
+
 if __name__ == "__main__":
     # Initialise variables
     model_acc_results = {}
     
     # Create a logger
     logger = Logger(__name__)
+    logger.set_level(logging.INFO)
 
     # Initialise visualiser
     visualiser = Visualiser()
@@ -89,12 +119,8 @@ if __name__ == "__main__":
     data_augmentation = model_handler.get_augmentation()
     visualiser.visualise_sample_images(5, x_train, 5, data_augmentation)
 
-    # Train models
+    # Train and profile models
     model_acc_results = train_models(model_handler, visualiser, logger, x_train, y_train, x_test, y_test, model_acc_results)
-
-    # Summarise the accuracy results of the models
-    logger.info("Model Accuracy Results:")
-    for model_name, accuracy in model_acc_results.items():
-        logger.info(f"{model_name}:{accuracy * 100:.2f}%")
-
+    profile_models(model_acc_results)
+    
     logger.info("Done!")

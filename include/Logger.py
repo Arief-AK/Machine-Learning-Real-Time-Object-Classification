@@ -38,6 +38,9 @@ class Logger:
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 
+    def set_level(self, level: int):
+        self.logger.setLevel(level)
+
     def debug(self, message: str):
         self.logger.debug(message)
 
