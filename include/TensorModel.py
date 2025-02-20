@@ -20,6 +20,11 @@ class TensorModel:
         ]
 
         return class_names
+    
+    def load_model(self, model_path: str) -> tf.keras.Model:
+        # Load the model
+        model = tf.keras.models.load_model(model_path)
+        return model
 
     def load_data(self) -> tuple:
         # Load the CIFAR-10 dataset
