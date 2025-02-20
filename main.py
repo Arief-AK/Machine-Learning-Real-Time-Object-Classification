@@ -81,7 +81,7 @@ def train_models(model_handler: TensorModel, visualiser: Visualiser, logger: Log
 
     return model_acc_results
 
-def profile_models(model_acc_results:dict):
+def profile_models(model_acc_results:dict, visualiser: Visualiser, logger: Logger):
     # Initialise profiler
     profiler = ModelProfiler()
 
@@ -91,8 +91,12 @@ def profile_models(model_acc_results:dict):
             # Load the model and data
             model = model_handler.load_model(f"models/{model_name}.h5")
             (_, _), (x_test, _) = model_handler.load_data()
-            batch_time, throughput_time = profiler.measure_average_inference_time(batch_size, model, x_test, show_single_image_inference=True)
+            (batch_time, throughput_time), (single_image_time) = profiler.measure_average_inference_time(batch_size, model, x_test, show_single_image_inference=True)
 
+            # Plot the batch timings
+            timings = [single_image_time, batch_time, throughput_time]
+            visualiser.plot_inference_timings(timings, batch_size, model_name)
+            
             # Log the results
             logger.info(f"Model: {model_name}")
             logger.info(f"Batch size: {batch_size}")
@@ -121,6 +125,6 @@ if __name__ == "__main__":
 
     # Train and profile models
     model_acc_results = train_models(model_handler, visualiser, logger, x_train, y_train, x_test, y_test, model_acc_results)
-    profile_models(model_acc_results)
+    profile_models(model_acc_results, visualiser, logger)
     
     logger.info("Done!")
