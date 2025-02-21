@@ -26,7 +26,7 @@ class ModelProfiler:
         avg_time = np.mean(times)
         return avg_time
 
-    def measure_average_inference_time(self, batch_size, model, x_sample, show_single_image_inference=False) -> tuple:
+    def measure_average_inference_time(self, batch_size, model, x_sample, show_single_image_inference=True) -> tuple:
         # Show the inference time for a single image
         if show_single_image_inference:
             x_single = np.expand_dims(x_sample[0], axis=0)
@@ -41,4 +41,4 @@ class ModelProfiler:
         # Calculate the throughput
         throughput = batch_size / (batch_time / 1000)
         self.logger.debug(f"Throughput: {throughput:.2f} images/s")
-        return batch_time, throughput
+        return (batch_time, throughput), (single_image_time)

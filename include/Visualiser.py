@@ -84,3 +84,22 @@ class Visualiser:
         result_directory = f"{self.IMAGE_DIRECTORY}Training/{str_model}/"
         os.makedirs(result_directory, exist_ok=True)
         plt.savefig(f"{result_directory}{str_model}_training_diagonal_confusion_matrix.png")
+
+    def plot_inference_timings(self, inference_timings: list, batch_size:int, str_model):
+        metrics = ["Single Image Inference Time", f"Batch Inference Time ({batch_size})", "Throughput (Images/Sec)"]
+        
+        plt.figure(figsize=(8, 5))
+        plt.bar(metrics, inference_timings, color=['blue', 'green', 'red'])
+        plt.ylabel("Milliseconds (ms) / Images per sec")
+        plt.title("Inference Speed Comparison")
+        plt.xticks(rotation=10)
+        plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+        # Display the values on top of the bars
+        for i, v in enumerate(inference_timings):
+            plt.text(i, v + 1, f"{v:.2f}", ha="center", fontsize=12)
+
+        # Create result directory
+        result_directory = f"{self.IMAGE_DIRECTORY}Inference/{str_model}/"
+        os.makedirs(result_directory, exist_ok=True)
+        plt.savefig(f"{result_directory}{str_model}_{batch_size}_inference_timings.png")
