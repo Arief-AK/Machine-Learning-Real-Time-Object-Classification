@@ -1,11 +1,15 @@
 import os.path
+import tensorflow as tf
+
+# Enable eager execution
+tf.compat.v1.enable_eager_execution()
 
 from include.Visualiser import Visualiser
 from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 50
+NUM_EPOCHS = 10
 BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
@@ -21,9 +25,12 @@ def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser
     visualiser.plot_diagonal_confusion_matrix(diagonal_matrix, model_handler.get_class_names(), str_model)
 
 def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualiser, logger: Logger, x_train, y_train, x_test, y_test, batch_size) -> tuple:
+    logger.info(f"Eager enabled: {tf.executing_eagerly()}")
+
     # Check to see if the model has already been trained
     if USE_EXISTING_MODELS and os.path.exists(f"models/{model_name}.h5"):
-        model = model_handler.load_model(f"models/{model_name}.h5")
+        model = model = tf.keras.models.load_model(f"models/{model_name}.h5")
+        (x_train, y_train), (x_test, y_test) = model_handler.load_data()
     else:
         if model_name == "base_model":
             model = model_handler.create_cnn()
