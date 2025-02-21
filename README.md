@@ -1,5 +1,5 @@
 # Machine-Learning: Real-Time-Object-Classification
-Application of machine learning models to recognise objects from the [CIFAR-10]() dataset. This work uses the [TensorFlow]() framework to build, train, and deploy models to produce real-time object classifications.
+Application of machine learning models to recognise objects from the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset. This work uses the [TensorFlow](https://www.tensorflow.org/) framework to build, train, and deploy models to produce real-time object classifications.
 
 >[!NOTE]
 >
