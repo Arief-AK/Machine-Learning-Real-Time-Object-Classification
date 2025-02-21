@@ -1,9 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-# Enable eager execution
-tf.compat.v1.enable_eager_execution()
-
 from tensorflow.keras.datasets import cifar10       # type: ignore
 from tensorflow.keras.utils import to_categorical   # type: ignore
 
