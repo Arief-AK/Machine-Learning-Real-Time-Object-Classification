@@ -21,7 +21,7 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          #pip install -r .github/workflows/runner_requirements.txt
+          pip install -r .github/workflows/runner_requirements.txt
           python Train.py
 
           # Create a CML report
