@@ -1,4 +1,4 @@
-name: Train Model
+name: CML
 
 on:
     push:
@@ -9,32 +9,21 @@ on:
             - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  train-and-report:
+    runs-on: [self-hosted, cml-gpu]
+    timeout-minutes: 50400
+    container:
+      image: docker://iterativeai/cml:0-dvc2-base1-gpu
+      options: --gpus all
+    steps:
+      - uses: actions/checkout@v4
+      - name: Train model
+        env:
+          REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          pip install -r requirements.txt
+          python Train.py
 
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Python
-          uses: actions/setup-python@v5.4.0
-
-        - name: Setup CML (Continuous Machine Learning)
-          uses: iterative/setup-cml@v2.0.1
-
-        - name: Cache Dependencies
-          uses: actions/cache@v4
-          with:
-            path: ~/.cache/pip
-            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-            restore-keys: |
-              ${{ runner.os }}-pip-
-
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-
-        - name: Train model
-          run: |
-            python Train.py
+          # Create a CML report
+          echo '![](images/Training/batch_norm_model/batch_norm_model_training_confusion_matrix.png "Confusion Matrix")' >> report.md
+          cml comment create report.md
