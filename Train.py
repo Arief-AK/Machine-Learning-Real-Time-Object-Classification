@@ -6,11 +6,12 @@ from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 25
+NUM_EPOCHS = 5
 BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
+SAVE_MODELS = True
 USE_EXISTING_MODELS = True
 
 def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser, model, x_test, y_test, str_model):
@@ -38,7 +39,9 @@ def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualis
 
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=batch_size, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
-    model.save(f"models/{model_name}.h5")
+
+    if SAVE_MODELS:
+        model.save(f"models/{model_name}.keras")
     
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
@@ -76,14 +79,14 @@ def profile_models(model_acc_results:dict, visualiser: Visualiser, logger: Logge
             logger.info(f"Accuracy:{accuracy * 100:.2f}%\n")
 
 if __name__ == "__main__":
-    # Initialise variables
+    # # Initialise variables
     model_acc_results = {}
     
-    # Create a logger
+    # # Create a logger
     logger = Logger(__name__)
     logger.set_level(logging.INFO)
 
-    # Initialise visualiser
+    # # Initialise visualiser
     visualiser = Visualiser()
 
     # Initalise model handler
@@ -96,6 +99,6 @@ if __name__ == "__main__":
 
     # Train and profile models
     model_acc_results = train_models(model_handler, visualiser, logger, x_train, y_train, x_test, y_test, model_acc_results)
-    profile_models(model_acc_results, visualiser, logger)
+    #profile_models(model_acc_results, visualiser, logger)
     
     logger.info("Done!")
