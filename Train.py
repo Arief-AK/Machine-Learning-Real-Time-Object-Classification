@@ -99,6 +99,6 @@ if __name__ == "__main__":
 
     # Train and profile models
     model_acc_results = train_models(model_handler, visualiser, logger, x_train, y_train, x_test, y_test, model_acc_results)
-    #profile_models(model_acc_results, visualiser, logger)
+    profile_models(model_acc_results, visualiser, logger)
     
     logger.info("Done!")
