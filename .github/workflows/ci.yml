@@ -21,7 +21,7 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          # Run the training script
+          # Run the training script with python
           python Train.py
 
           # Create a CML report
