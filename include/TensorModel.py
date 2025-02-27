@@ -47,9 +47,13 @@ class TensorModel:
     def get_augmentation(self) -> tf.keras.Sequential:
         # Create a data augmentation layer
         data_augmentation = tf.keras.Sequential([
-            tf.keras.layers.RandomFlip("horizontal"),   # Randomly flip images horizontally
-            tf.keras.layers.RandomRotation(0.1),        # Randomly rotate image up to 10%
-            tf.keras.layers.RandomZoom(0.1)    # Randomly zoom image up to 10%
+            tf.keras.layers.RandomFlip("horizontal"),                                                               # Randomly flip images horizontally
+            tf.keras.layers.RandomRotation(0.1),                                                                    # Randomly rotate image up to 10%
+            tf.keras.layers.RandomZoom(0.1),                                                                        # Randomly zoom image up to 10%
+            tf.keras.layers.RandomContrast(0.1),                                                                    # Randomly adjust contrast up to 10%
+            tf.keras.layers.Lambda(lambda x: tf.image.random_brightness(x, max_delta=0.2)),                         # Randomly adjust brightness
+            tf.keras.layers.Lambda(lambda x: tf.image.random_crop(x, size=[tf.shape(x)[0], tf.shape(x)[1] - 8, tf.shape(x)[2] - 8, tf.shape(x)[3]])),   # Cutout augmentation
+            tf.keras.layers.Lambda(lambda x: 0.5 * x + 0.5 * tf.roll(x, shift=1, axis=0))                                                               # MixUp augmentation (approximate)
         ])
 
         return data_augmentation
