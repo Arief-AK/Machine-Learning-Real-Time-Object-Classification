@@ -6,12 +6,12 @@ from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 25
 BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
-USE_EXISTING_MODELS = True
+USE_EXISTING_MODELS = False
 
 SAVE_MODELS = True
 SAVE_MODELS_AS_H5 = True
