@@ -6,12 +6,17 @@ from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 25
+NUM_EPOCHS = 5
 BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
 USE_EXISTING_MODELS = True
+
+SAVE_MODELS = True
+SAVE_MODELS_AS_H5 = True
+SAVE_MODELS_AS_KERAS = True
+SAVE_MODELS_AS_SavedModel = True
 
 def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser, model, x_test, y_test, str_model):
     conf_matrix = model_handler.compute_confusion_matrix(model, x_test, y_test)
@@ -22,8 +27,6 @@ def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser
     visualiser.plot_diagonal_confusion_matrix(diagonal_matrix, model_handler.get_class_names(), str_model)
 
 def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualiser, logger: Logger, x_train, y_train, x_test, y_test, batch_size) -> tuple:
-    logger.info(f"Eager enabled: {tf.executing_eagerly()}")
-
     # Check if model exists
     if USE_EXISTING_MODELS and os.path.exists(f"models/{model_name}.h5"):
         model = model = tf.keras.models.load_model(f"models/{model_name}.h5")
@@ -38,7 +41,16 @@ def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualis
 
     history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=batch_size, validation_data=(x_test, y_test))
     test_loss, test_acc = model.evaluate(x_test, y_test)
-    model.save(f"models/{model_name}.h5")
+
+    if SAVE_MODELS:
+        if SAVE_MODELS_AS_H5:
+            model.save(f"models/{model_name}.h5")
+
+        if SAVE_MODELS_AS_KERAS:
+            model.save(f"models/{model_name}.keras")
+
+        if SAVE_MODELS_AS_SavedModel:
+            model.export(f"models/{model_name}_saved_model")
     
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
@@ -76,14 +88,14 @@ def profile_models(model_acc_results:dict, visualiser: Visualiser, logger: Logge
             logger.info(f"Accuracy:{accuracy * 100:.2f}%\n")
 
 if __name__ == "__main__":
-    # Initialise variables
+    # # Initialise variables
     model_acc_results = {}
     
-    # Create a logger
+    # # Create a logger
     logger = Logger(__name__)
     logger.set_level(logging.INFO)
 
-    # Initialise visualiser
+    # # Initialise visualiser
     visualiser = Visualiser()
 
     # Initalise model handler
