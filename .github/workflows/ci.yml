@@ -22,7 +22,7 @@ jobs:
           REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           # Run the training script with python
-          python Train.py
+          python3 Train.py
 
           # Create a CML report
           echo '![](images/Training/batch_norm_model/batch_norm_model_training_confusion_matrix.png "Confusion Matrix")' >> report.md
