@@ -11,7 +11,7 @@ BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
-USE_EXISTING_MODELS = True
+USE_EXISTING_MODELS = False
 
 SAVE_MODELS = True
 SAVE_MODELS_AS_H5 = True
@@ -27,8 +27,6 @@ def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser
     visualiser.plot_diagonal_confusion_matrix(diagonal_matrix, model_handler.get_class_names(), str_model)
 
 def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualiser, logger: Logger, x_train, y_train, x_test, y_test, batch_size) -> tuple:
-    logger.info(f"Eager enabled: {tf.executing_eagerly()}")
-
     # Check if model exists
     if USE_EXISTING_MODELS and os.path.exists(f"models/{model_name}.h5"):
         model = model = tf.keras.models.load_model(f"models/{model_name}.h5")
