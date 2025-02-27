@@ -6,7 +6,7 @@ from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 2
 BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
