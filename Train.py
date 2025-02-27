@@ -11,8 +11,12 @@ BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
-SAVE_MODELS = True
 USE_EXISTING_MODELS = True
+
+SAVE_MODELS = True
+SAVE_MODELS_AS_H5 = True
+SAVE_MODELS_AS_KERAS = True
+SAVE_MODELS_AS_SavedModel = True
 
 def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser, model, x_test, y_test, str_model):
     conf_matrix = model_handler.compute_confusion_matrix(model, x_test, y_test)
@@ -41,7 +45,14 @@ def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualis
     test_loss, test_acc = model.evaluate(x_test, y_test)
 
     if SAVE_MODELS:
-        model.save(f"models/{model_name}.keras")
+        if SAVE_MODELS_AS_H5:
+            model.save(f"models/{model_name}.h5")
+
+        if SAVE_MODELS_AS_KERAS:
+            model.save(f"models/{model_name}.keras")
+
+        if SAVE_MODELS_AS_SavedModel:
+            model.export(f"models/{model_name}_saved_model")
     
     logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
