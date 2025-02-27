@@ -13,7 +13,7 @@ jobs:
     runs-on: [self-hosted, cml-gpu]
     timeout-minutes: 50400
     container:
-      image: docker://iterativeai/cml:0-dvc2-base1-gpu
+      image: docker://ariefak/real-time_object_classification:latest
       options: --gpus all
     steps:
       - uses: actions/checkout@v4
