@@ -6,8 +6,8 @@ from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 40
-BATCH_FITTING = 64
+NUM_EPOCHS = 10
+BATCH_FITTING = 128
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
@@ -32,7 +32,7 @@ def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualis
     # Check if model exists
     if USE_EXISTING_MODELS and os.path.exists(f"models/{model_name}.keras"):
         model = model = tf.keras.models.load_model(f"models/{model_name}.keras")
-        model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+        model.compile(optimizer="sgd", loss="categorical_crossentropy", metrics=["accuracy"])
         model.build()
         model.summary()
     else:
