@@ -56,6 +56,6 @@ class LiveCameraClassifier:
 # Example Usage
 if __name__ == "__main__":
     class_names = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
-    model = load_model("models/batch_norm_model.h5")
+    model = load_model("models/batch_norm_model_rmsprop.keras")
     classifier = LiveCameraClassifier(model, class_names)
     classifier.run()
