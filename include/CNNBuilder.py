@@ -1,5 +1,34 @@
-from tensorflow.keras import layers, models, optimizers, callbacks  # type: ignore
 from include.Logger import Logger
+from tensorflow.keras import layers, models, optimizers, callbacks, regularizers # type: ignore
+
+class CustomEarlyStopping(callbacks.Callback):
+    def __init__(self, target_accuracy=0.95, patience=5, restore_best_weights=True):
+        super(CustomEarlyStopping, self).__init__()
+        self.target_accuracy = target_accuracy
+        self.patience = patience
+        self.restore_best_weights = restore_best_weights
+        self.best_accuracy = 0
+        self.wait = 0
+        self.logger = Logger(__name__)
+
+    def on_epoch_end(self, epoch, logs=None):
+        current_accuracy = logs["val_accuracy"]
+        
+        # Check the current accuracy against the best accuracy
+        if current_accuracy > self.best_accuracy:
+            self.best_accuracy = current_accuracy
+            self.wait = 0
+        else:
+            self.wait += 1
+            self.logger.debug(f"Accuracy: {current_accuracy}, Best Accuracy: {self.best_accuracy}, Wait: {self.wait}")
+            
+            if self.wait >= self.patience:
+                self.model.stop_training = True
+                self.logger.info(f"Early stopping triggered at epoch {epoch}")
+                
+                if self.restore_best_weights:
+                    self.model.set_weights(self.best_weights)
+                    self.logger.info("Restored best weights")
 
 class CNNBuilder:
     def __init__(self, input_shape):
@@ -7,8 +36,9 @@ class CNNBuilder:
         self.model.add(layers.InputLayer(input_shape=input_shape))
         self.logger = Logger(__name__)
 
-    def add_conv_layer(self, filters, kernel_size, activation="relu", padding="same", kernel_reguliser=None):
-        self.model.add(layers.Conv2D(filters, kernel_size, padding=padding, kernel_regularizer=kernel_reguliser, kernel_initializer="he_normal"))
+    def add_conv_layer(self, filters, kernel_size, activation="relu", padding="same", kernel_reguliser=None, weight_decay=1e-4):
+        kernel_reguliser = kernel_reguliser if kernel_reguliser else None
+        self.model.add(layers.Conv2D(filters, kernel_size, strides=1, padding=padding, kernel_regularizer=regularizers.l2(weight_decay)))
         self.model.add(layers.BatchNormalization())     # BatchNorm before activation
         self.model.add(layers.Activation(activation))   # Separate activation
         return self
@@ -68,15 +98,18 @@ class CNNBuilder:
         self.lr_warmup = None
         if use_lr_warmup:
             def lr_schedule(epoch, lr):
-                if epoch < 5:                                                       # Warm-up for first 5 epochs
-                    return lr * (epoch + 1) / 5
-                return lr
+                if epoch < 10:
+                    return 0.001
+                elif epoch < 30:
+                    return 0.0005
+                else:
+                    return 0.0002
             self.lr_warmup = callbacks.LearningRateScheduler(lr_schedule)
 
         # Early Stopping
         self.early_stopping = None
         if use_early_stopping:
-            self.early_stopping = callbacks.EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True)
+            self.early_stopping = CustomEarlyStopping(target_accuracy=0.95, patience=5, restore_best_weights=True)
 
         # Get all callbacks
         self.callbacks_list = self.get_callbacks()
