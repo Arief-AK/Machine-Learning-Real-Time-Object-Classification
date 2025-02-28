@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import time
 
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model # type: ignore
 from include.Logger import Logger
 
 class LiveCameraClassifier:
