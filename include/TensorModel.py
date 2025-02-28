@@ -50,10 +50,7 @@ class TensorModel:
             tf.keras.layers.RandomFlip("horizontal"),                                                               # Randomly flip images horizontally
             tf.keras.layers.RandomRotation(0.1),                                                                    # Randomly rotate image up to 10%
             tf.keras.layers.RandomZoom(0.1),                                                                        # Randomly zoom image up to 10%
-            tf.keras.layers.RandomContrast(0.1),                                                                    # Randomly adjust contrast up to 10%
-            tf.keras.layers.Lambda(lambda x: tf.image.random_brightness(x, max_delta=0.2)),                         # Randomly adjust brightness
-            tf.keras.layers.Lambda(lambda x: tf.image.random_crop(x, size=[tf.shape(x)[0], tf.shape(x)[1] - 8, tf.shape(x)[2] - 8, tf.shape(x)[3]])),   # Cutout augmentation
-            tf.keras.layers.Lambda(lambda x: 0.5 * x + 0.5 * tf.roll(x, shift=1, axis=0))                                                               # MixUp augmentation (approximate)
+            tf.keras.layers.RandomContrast(0.1)                                                                    # Randomly adjust contrast up to 10%
         ])
 
         return data_augmentation
@@ -68,13 +65,19 @@ class TensorModel:
         if batch_normalisation:
             model = (builder
                     .add_data_augmentation(data_augmentation)
-                    .add_conv_layer(32, (3,3))
-                    .add_pooling_layer()
+                    .add_conv_layer(64, (3,3))
                     .add_conv_layer(64, (3, 3))
-                    .add_pooling_layer()
+                    .add_pooling_layer(strides=(2, 2))
+                    .add_conv_layer(64, (3, 3))
+                    .add_conv_layer(128, (3, 3))
+                    .add_pooling_layer(strides=(2, 2))
+                    .add_conv_layer(64, (3, 3))
+                    .add_conv_layer(64, (3, 3))
+                    .add_pooling_layer(strides=(2, 2))
+                    .add_dropout(0.3)
                     .add_flaten_layer()
-                    .add_dense_layer(128, activation="relu")
-                    .add_dropout(0.5)
+                    .add_dense_layer(256, activation="relu")
+                    .add_dropout(0.3)
                     .add_dense_layer(10, activation="softmax")
                     .compile_model(optimiser=optimiser, learning_rate=learning_rate, decay_factor=decay_factor, use_lr_warmup=True, use_early_stopping=True)
                     .build()

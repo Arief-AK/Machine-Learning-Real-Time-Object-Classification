@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import time
 
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model # type: ignore
 from include.Logger import Logger
 
 class LiveCameraClassifier:
@@ -56,6 +56,6 @@ class LiveCameraClassifier:
 # Example Usage
 if __name__ == "__main__":
     class_names = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
-    model = load_model("models/batch_norm_model.h5")
+    model = load_model("models/batch_norm_model_rmsprop.keras")
     classifier = LiveCameraClassifier(model, class_names)
     classifier.run()
