@@ -38,7 +38,7 @@ class CNNBuilder:
 
     def add_conv_layer(self, filters, kernel_size, activation="relu", padding="same", kernel_reguliser=None, weight_decay=1e-4):
         kernel_reguliser = kernel_reguliser if kernel_reguliser else None
-        self.model.add(layers.Conv2D(filters, kernel_size, strides=1, padding=padding, kernel_regularizer=regularizers.l2(weight_decay), kernel_initializer="he_normal"))  # He initialization
+        self.model.add(layers.Conv2D(filters, kernel_size, strides=1, padding=padding, kernel_regularizer=regularizers.l2(weight_decay)))
         self.model.add(layers.BatchNormalization())     # BatchNorm before activation
         self.model.add(layers.Activation(activation))   # Separate activation
         return self
@@ -109,7 +109,7 @@ class CNNBuilder:
         # Early Stopping
         self.early_stopping = None
         if use_early_stopping:
-            self.early_stopping = callbacks.EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True)
+            self.early_stopping = CustomEarlyStopping(target_accuracy=0.95, patience=5, restore_best_weights=True)
 
         # Get all callbacks
         self.callbacks_list = self.get_callbacks()

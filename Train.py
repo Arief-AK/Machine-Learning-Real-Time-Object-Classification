@@ -6,17 +6,19 @@ from include.Logger import Logger, logging
 from include.TensorModel import TensorModel
 from include.ModelProfiler import ModelProfiler
 
-NUM_EPOCHS = 5
-BATCH_FITTING = 128
+NUM_EPOCHS = 40
+BATCH_FITTING = 64
 BATCH_PROFILING = [32, 64, 128]
 
 MODELS = ["base_model", "batch_norm_model", "batch_norm_model_sgd", "batch_norm_model_rmsprop"]
 USE_EXISTING_MODELS = True
 
 SAVE_MODELS = True
-SAVE_MODELS_AS_H5 = True
+SAVE_MODELS_AS_H5 = False
 SAVE_MODELS_AS_KERAS = True
-SAVE_MODELS_AS_SavedModel = True
+SAVE_MODELS_AS_SavedModel = False
+
+PROFILE_MODELS = True
 
 def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser, model, x_test, y_test, str_model):
     conf_matrix = model_handler.compute_confusion_matrix(model, x_test, y_test)
@@ -28,8 +30,8 @@ def create_predicition_matrix(model_handler: TensorModel, visualiser: Visualiser
 
 def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualiser, logger: Logger, x_train, y_train, x_test, y_test, batch_size) -> tuple:
     # Check if model exists
-    if USE_EXISTING_MODELS and os.path.exists(f"models/{model_name}.h5"):
-        model = model = tf.keras.models.load_model(f"models/{model_name}.h5")
+    if USE_EXISTING_MODELS and os.path.exists(f"models/{model_name}.keras"):
+        model = model = tf.keras.models.load_model(f"models/{model_name}.keras")
         model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
         model.build()
         model.summary()
@@ -39,8 +41,8 @@ def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualis
         else:
             model = model_handler.create_cnn(batch_normalisation=True)
 
-    history = model.fit(x_train, y_train, epochs=NUM_EPOCHS, batch_size=batch_size, validation_data=(x_test, y_test))
-    test_loss, test_acc = model.evaluate(x_test, y_test)
+    history = model.fit(x_train, y_train, steps_per_epoch=x_train.shape[0], epochs=NUM_EPOCHS, batch_size=batch_size, validation_data=(x_test, y_test))
+    test_loss, test_acc = model.evaluate(x_test, y_test, batch_size=batch_size)
 
     if SAVE_MODELS:
         if SAVE_MODELS_AS_H5:
@@ -52,7 +54,7 @@ def train_model(model_name:str, model_handler: TensorModel, visualiser: Visualis
         if SAVE_MODELS_AS_SavedModel:
             model.export(f"models/{model_name}_saved_model")
     
-    logger.info(f"Model accuracy: {test_acc * 100:.2f}%")
+    logger.info(f"{model_name} Model accuracy: {test_acc * 100:.2f}%")
     visualiser.plot_training_history(history, model_name)
     return (model, model_name), (test_acc)
 
@@ -72,7 +74,7 @@ def profile_models(model_acc_results:dict, visualiser: Visualiser, logger: Logge
         # Load models
         for model_name, accuracy in model_acc_results.items():
             # Load the model and data
-            model = model_handler.load_model(f"models/{model_name}.h5")
+            model = model_handler.load_model(f"models/{model_name}.keras")
             (_, _), (x_test, _) = model_handler.load_data()
             (batch_time, throughput_time), (single_image_time) = profiler.measure_average_inference_time(batch_size, model, x_test, show_single_image_inference=True)
 
@@ -108,6 +110,8 @@ if __name__ == "__main__":
 
     # Train and profile models
     model_acc_results = train_models(model_handler, visualiser, logger, x_train, y_train, x_test, y_test, model_acc_results)
-    profile_models(model_acc_results, visualiser, logger)
+    
+    if PROFILE_MODELS:
+        profile_models(model_acc_results, visualiser, logger)
     
     logger.info("Done!")
